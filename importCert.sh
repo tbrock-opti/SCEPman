@@ -2,7 +2,6 @@
 # $1 = full path to downloaded PFX file
 # $2 = PFX file password
 # $3 = SCEPman URL prefix (app-scepman-xxxxxxxxxxxxxxx)
-# $4 = Azure UPN (Username) of user cert is for
 
 PFX_FILE="$1"
 PFX_PASS="$2"
@@ -16,6 +15,10 @@ CA_CERT_FILENAME="scepman-root.pem"
 GREEN=$(tput setaf 2)
 RED=$(tput setaf 1)
 NC=$(tput sgr0)
+
+# get UPN from cert path
+BN=$(basename $PFX_FILE)
+UPN=$(echo "${BN//certificate-/""}" | cut -d '-' -f 1)
 
 # verify or create pki directory
 echo -e "${GREEN}Verifying PKI directory..."
@@ -35,7 +38,7 @@ fi
 
 # save username (to be used in renewal script)
 echo -e "${GREEN}Saving UPN..."
-echo $4 > $PKI_DIR/upn
+echo $UPN > $PKI_DIR/upn
 
 # save private key passphrase
 echo $PFX_PASS > $PKI_DIR/pp
