@@ -2,6 +2,7 @@
 # $1 = full path to downloaded PFX file
 # $2 = PFX file password
 # $3 = SCEPman URL prefix (app-scepman-xxxxxxxxxxxxxxx)
+# $4 = Wifi SSID
 
 PFX_FILE="$1"
 PFX_PASS="$2"
@@ -12,6 +13,7 @@ CERT_FILE="scepman-client.pem"
 SCEPMAN_URL="https://$3.azurewebsites.net"
 CA_CERT_PATH="$3"
 CA_CERT_FILENAME="scepman-root.pem"
+SSID="$4"
 GREEN=$(tput setaf 2)
 RED=$(tput setaf 1)
 NC=$(tput sgr0)
@@ -56,15 +58,15 @@ echo "${GREEN}Extracting client certificate...${NC}"
 openssl pkcs12 -in $1 -clcerts -nokeys -out $PKI_DIR/$CERT_FILE -passin pass:$PFX_PASS
 
 # delete any existing connections for the same SSID
-echo "${GREEN}Deleting any existing Optimizely Wireless connections...${NC}"
+echo "${GREEN}Deleting any existing $SSID connections...${NC}"
 while read -r line; do 
 	sudo nmcli con delete $line
-done <<< $(nmcli -t -f name,UUID con | grep "Optimizely Internal" | cut -d ":" -f 2)
+done <<< $(nmcli -t -f name,UUID con | grep "$SSID" | cut -d ":" -f 2)
 
 # create wifi connection
-echo "${GREEN}Creating Wifi Connection for Optimizely Wireless...${NC}"
-sudo nmcli c add type wifi ifname wlan0 con-name "Optimizely Internal" \
-	802-11-wireless.ssid "Optimizely Internal" \
+echo "${GREEN}Creating Wifi Connection for $SSID...${NC}"
+sudo nmcli c add type wifi ifname wlan0 con-name "$SSID" \
+	802-11-wireless.ssid "$SSID" \
 	802-11-wireless-security.key-mgmt wpa-eap \
 	802-1x.eap tls \
 	802-1x.identity anonymous \
