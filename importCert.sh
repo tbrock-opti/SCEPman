@@ -62,7 +62,7 @@ echo "${GREEN}Deleting any existing $SSID connections...${NC}"
 CONS_DEL=$(nmcli -t -f name,UUID con | grep "$SSID" | cut -d ":" -f 2)
 if ! [[ -z $CONS_DEL ]]; then
     for line in $CONS_DEL; do 
-        sudo nmcli con delete "$line"
+        #sudo nmcli con delete "$line"
     done
 fi
 
