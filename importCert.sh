@@ -30,6 +30,8 @@ GREEN=$(tput setaf 2)
 RED=$(tput setaf 1)
 NC=$(tput sgr0)
 
+echo "PFX_FILE: $PFX_FILE"
+
 # save SCEPman url root
 echo "$3" > "$PKI_DIR/scepmanurlroot"
 
