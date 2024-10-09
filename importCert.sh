@@ -57,7 +57,7 @@ cp "./renewcertificate.sh" "$PKI_DIR/"
 # save username (to be used in renewal script)
 BN=$(basename $PFX_FILE)
 echo "basename; $BN"
-UPN="$(echo "${BN//certificate-/""}" | cut -d '-' -f 1)"
+UPN="$(echo "${BN//certificate-/}" | cut -d '-' -f 1)"
 echo "${GREEN}Saving UPN: $UPN...${NC}"
 echo $UPN > $PKI_DIR/upn
 
