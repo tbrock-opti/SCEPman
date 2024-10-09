@@ -11,7 +11,6 @@ NOENC_KEY_FILE="scepman-client-noenc.key.pem" # unencrypted key file name
 KEY_FILE="scepman-client.key.pem"
 CERT_FILE="scepman-client.pem"                  # client cert file name
 CA_CERT_FILE="scepman-root.pem"                 # root CA file name
-APPSERVICE_URL="$2"                             # SCEPman instance root URL
 UPN=$(cat $PKI_DIR/upn)                         # read UPN from scepman directory
 PASSPHRASE=$(cat $PKI_DIR/pp)                   # passphrase for private key
 HOSTNAME=$(hostname)                            # get hostname
@@ -20,6 +19,9 @@ ABS_CER=$(readlink -f $PKI_DIR/$CERT_FILE)      # read cert file path
 ABS_KEY=$(readlink -f $PKI_DIR/$NOENC_KEY_FILE) # read cert key file path
 ABS_ROOT=$(readlink -f $PKI_DIR/$CA_CERT_FILE)  # read CA file path
 echo "ABS_KEY: $ABS_KEY"
+
+# build SCEPman URL
+APPSERVICE_URL="https://$(cat $PKI_DIR/scepmanurlroot).azurewebsites.net"                             # SCEPman instance root URL
 
 TEMP=$(mktemp -d tmpXXXXXXX)
 TEMP_CSR="$TEMP/tmp.csr"
