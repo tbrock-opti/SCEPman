@@ -55,6 +55,12 @@ openssl pkcs12 -in $PFX_FILE -nocerts -out $PKI_DIR/$KEY_FILE -passin pass:$PFX_
 echo "${GREEN}Extracting client certificate...${NC}"
 openssl pkcs12 -in $1 -clcerts -nokeys -out $PKI_DIR/$CERT_FILE -passin pass:$PFX_PASS
 
+# delete any existing connections for the same SSID
+echo "${GREEN}Deleting any existing Optimizely Wireless connections...${NC}"
+while read -r line; do 
+	sudo nmcli con delete $line
+done <<< $(nmcli -t -f name,UUID con | grep "Optimizely Internal" | cut -d ":" -f 2)
+
 # create wifi connection
 echo "${GREEN}Creating Wifi Connection for Optimizely Wireless...${NC}"
 sudo nmcli c add type wifi ifname wlan0 con-name "Optimizely Internal" \
