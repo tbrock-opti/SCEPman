@@ -33,10 +33,6 @@ NC=$(tput sgr0)
 # save SCEPman url root
 echo "$3" > "$PKI_DIR/scepmanurlroot"
 
-# get UPN from cert path
-BN=$(basename $PFX_FILE)
-UPN=$(echo "${BN//certificate-/""}" | cut -d '-' -f 1)
-
 # verify or create pki directory
 echo "${GREEN}Verifying PKI directory..."
 if [ -d "$PKI_DIR" ]; then
@@ -46,6 +42,9 @@ else
 	mkdir $PKI_DIR
 fi
 
+# copy renewal script to pki directory
+cp "./renewcertificate.sh" "$PKI_DIR/"
+
 # get CA cert and convert it to PEM
 	echo "${GREEN}Downloading CA cert from SCEPman...${NC}"
 	wget -O "$PKI_DIR/scepman-root.cer" \
@@ -54,6 +53,8 @@ fi
 		-outform PEM -out "$PKI_DIR/scepman-root.pem"
 
 # save username (to be used in renewal script)
+BN=$(basename $PFX_FILE)
+UPN=$(echo "${BN//certificate-/""}" | cut -d '-' -f 1)
 echo "${GREEN}Saving UPN...${NC}"
 echo $UPN > $PKI_DIR/upn
 
