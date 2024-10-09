@@ -30,21 +30,21 @@ else
 fi
 
 # get CA cert and convert it to PEM
-	echo "${GREEN}Downloading CA cert from SCEPman..."
+	echo "${GREEN}Downloading CA cert from SCEPman...${NC}"
 	wget -O "$PKI_DIR/scepman-root.cer" \
 		"$SCEPMAN_URL/certsrv/mscep/mscep.dll/pkiclient.exe?operation=GetCACert"
 	openssl x509 -in "$PKI_DIR/scepman-root.cer" \
 		-outform PEM -out "$PKI_DIR/scepman-root.pem"
 
 # save username (to be used in renewal script)
-echo "${GREEN}Saving UPN..."
+echo "${GREEN}Saving UPN...${NC}"
 echo $UPN > $PKI_DIR/upn
 
 # save private key passphrase
 echo $PFX_PASS > $PKI_DIR/pp
 
 # extract key from PFX and encrypt with PFX password
-echo "${GREEN}Extracting private key..."
+echo "${GREEN}Extracting private key...${NC}"
 openssl pkcs12 -in $PFX_FILE -nocerts -out $PKI_DIR/$KEY_FILE -passin pass:$PFX_PASS -passout pass:$PFX_PASS
 
 # extract key from PFX and do not encrypt
@@ -52,11 +52,11 @@ openssl pkcs12 -in $PFX_FILE -nocerts -out $PKI_DIR/$KEY_FILE -passin pass:$PFX_
 #openssl pkcs12 -in $PFX_FILE -nocerts -out $PKI_DIR/$NOENC_KEY_FILE -passin pass:$PFX_PASS -passout pass:""
 
 # extract certificate from PFX
-echo "${GREEN}Extracting client certificate..."
+echo "${GREEN}Extracting client certificate...${NC}"
 openssl pkcs12 -in $1 -clcerts -nokeys -out $PKI_DIR/$CERT_FILE -passin pass:$PFX_PASS
 
 # create wifi connection
-echo "${GREEN}Creating Wifi Connection for Optimizely Wireless..."
+echo "${GREEN}Creating Wifi Connection for Optimizely Wireless...${NC}"
 sudo nmcli c add type wifi ifname wlan0 con-name "Optimizely Internal" \
 	802-11-wireless.ssid "Optimizely Internal" \
 	802-11-wireless-security.key-mgmt wpa-eap \
