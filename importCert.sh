@@ -4,6 +4,12 @@
 # $3 = SCEPman URL prefix (app-scepman-xxxxxxxxxxxxxxx)
 # $4 = Wifi SSID
 
+# validate input
+: "${1:?Error: Argument is null}"
+: "${2:?Error: Argument is null}"
+: "${3:?Error: Argument is null}"
+: "${4:?Error: Argument is null}"
+
 PFX_FILE="$1"
 PFX_PASS="$2"
 PKI_DIR="/home/$USER/.scepman"
@@ -49,10 +55,6 @@ echo $PFX_PASS > $PKI_DIR/pp
 echo "${GREEN}Extracting private key...${NC}"
 openssl pkcs12 -in $PFX_FILE -nocerts -out $PKI_DIR/$KEY_FILE -passin pass:$PFX_PASS -passout pass:$PFX_PASS
 
-# extract key from PFX and do not encrypt
-# renewing cert isn't compatible with encrypted key files
-#openssl pkcs12 -in $PFX_FILE -nocerts -out $PKI_DIR/$NOENC_KEY_FILE -passin pass:$PFX_PASS -passout pass:""
-
 # extract certificate from PFX
 echo "${GREEN}Extracting client certificate...${NC}"
 openssl pkcs12 -in $1 -clcerts -nokeys -out $PKI_DIR/$CERT_FILE -passin pass:$PFX_PASS
@@ -63,7 +65,6 @@ CONS_DEL=$(nmcli -t -f name,UUID con | grep "$SSID" | cut -d ":" -f 2)
 #if ! [[ -z $CONS_DEL ]]; then
     for line in $CONS_DEL; do 
         sudo nmcli con delete "$line"
-		#echo skipping network delete
     done
 #fi
 
