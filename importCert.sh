@@ -48,7 +48,6 @@ fi
 # copy renewal script to pki directory
 echo "${GREEN}Copying renewal script to PKI_DIR"
 cp "./renewcertificate.sh" "$PKI_DIR/"
-ls "$PKI_DIR/renewalcertificate.sh"
 
 # get CA cert and convert it to PEM
 echo "${GREEN}Downloading CA cert from SCEPman...${NC}"
