@@ -33,7 +33,7 @@ NC=$(tput sgr0)
 echo "PFX_FILE: $PFX_FILE"
 
 # save SCEPman url root
-echo "$3" > "$PKI_DIR/scepmanurlroot"
+echo "$3" >"$PKI_DIR/scepmanurlroot"
 
 # verify or create pki directory
 echo "${GREEN}Verifying PKI directory..."
@@ -48,23 +48,23 @@ fi
 cp "./renewcertificate.sh" "$PKI_DIR/"
 
 # get CA cert and convert it to PEM
-	echo "${GREEN}Downloading CA cert from SCEPman...${NC}"
-	wget -O "$PKI_DIR/scepman-root.cer" \
-		"$SCEPMAN_URL/certsrv/mscep/mscep.dll/pkiclient.exe?operation=GetCACert"
-	openssl x509 -in "$PKI_DIR/scepman-root.cer" \
-		-outform PEM -out "$PKI_DIR/scepman-root.pem"
+echo "${GREEN}Downloading CA cert from SCEPman...${NC}"
+wget -O "$PKI_DIR/scepman-root.cer" \
+	"$SCEPMAN_URL/certsrv/mscep/mscep.dll/pkiclient.exe?operation=GetCACert"
+openssl x509 -in "$PKI_DIR/scepman-root.cer" \
+	-outform PEM -out "$PKI_DIR/scepman-root.pem"
 
 # save username (to be used in renewal script)
 BN=$(basename $PFX_FILE)
-echo "basename; $BN"
+#echo "basename; $BN"
 UPN=$(echo "${BN//certificate-/}")
-echo "UPN temp: $UPN"
+#echo "UPN temp: $UPN"
 UPN=$(echo $UPN | cut -d '-' -f 1)
 echo "${GREEN}Saving UPN: $UPN...${NC}"
-echo $UPN > $PKI_DIR/upn
+echo $UPN >$PKI_DIR/upn
 
 # save private key passphrase
-echo $PFX_PASS > $PKI_DIR/pp
+echo $PFX_PASS >$PKI_DIR/pp
 
 # extract key from PFX and encrypt with PFX password
 echo "${GREEN}Extracting private key...${NC}"
@@ -77,11 +77,9 @@ openssl pkcs12 -in $1 -clcerts -nokeys -out $PKI_DIR/$CERT_FILE -passin pass:$PF
 # delete any existing connections for the same SSID
 echo "${GREEN}Deleting any existing $SSID connections...${NC}"
 CONS_DEL=$(nmcli -t -f name,UUID con | grep "$SSID" | cut -d ":" -f 2)
-#if ! [[ -z $CONS_DEL ]]; then
-    for line in $CONS_DEL; do 
-        sudo nmcli con delete "$line"
-    done
-#fi
+for line in $CONS_DEL; do
+	sudo nmcli con delete "$line"
+done
 
 # create wifi connection
 echo "${GREEN}Creating Wifi Connection for $SSID...${NC}"
@@ -99,6 +97,9 @@ sudo nmcli c add type wifi ifname wlan0 con-name "$SSID" \
 echo "${GREEN}Adding cron job for renewal...${NC}"
 COMMAND="/home/$USER/.scepman/renewcertificate.sh 30"
 JOB="0 10 * * * $COMMAND"
-(crontab -l ; echo "$JOB") | sort - | uniq - | crontab - 
+(
+	crontab -l
+	echo "$JOB"
+) | sort - | uniq - | crontab -
 echo "${GREEN}cron jobs:${NC}"
 crontab -l
