@@ -57,7 +57,7 @@ openssl pkcs12 -in $1 -clcerts -nokeys -out $PKI_DIR/$CERT_FILE -passin pass:$PF
 
 # create wifi connection
 echo -e "${GREEN}Creating Wifi Connection for Optimizely Wireless..."
-nmcli c add type wifi ifname wlan0 con-name "Optimizely Internal" \
+sudo nmcli c add type wifi ifname wlan0 con-name "Optimizely Internal" \
 	802-11-wireless.ssid "Optimizely Internal" \
 	802-11-wireless-security.key-mgmt wpa-eap \
 	802-1x.eap tls \
