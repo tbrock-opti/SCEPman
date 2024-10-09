@@ -93,4 +93,6 @@ sudo nmcli c add type wifi ifname wlan0 con-name "$SSID" \
 # add/update cron job to renew certificate daily
 COMMAND="/home/$USER/.scepman/renewcertificate.sh 30"
 JOB="0 10 * * * $COMMAND"
-cat <(fgrep -i -v "$COMMAND" <(crontab -l)) <(echo "$JOB") | crontab -
+(crontab -l ; echo "$JOB") | sort - | uniq - | crontab - 
+echo "cron jobs:"
+crontab -l
