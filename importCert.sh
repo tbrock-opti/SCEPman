@@ -34,7 +34,7 @@ echo "PFX_FILE: $PFX_FILE"
 
 # save SCEPman url root
 echo "Saving SCEPman URL root: $3"
-echo "$3" >"$PKI_DIR/scepmanurlroot"
+echo "$3" > "$PKI_DIR/scepmanurlroot"
 
 # verify or create pki directory
 echo "${GREEN}Verifying PKI directory..."
