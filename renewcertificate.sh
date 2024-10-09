@@ -72,7 +72,6 @@ if ! [ -z "${TRIMMED_STATUS}" ]; then
 
     else
         # cert isn't due for renewal based on supplied renewal days, ignore
-        echo "Certificate not expiring soon"
         exit 1
     fi
 else
