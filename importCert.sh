@@ -30,6 +30,9 @@ GREEN=$(tput setaf 2)
 RED=$(tput setaf 1)
 NC=$(tput sgr0)
 
+# save SCEPman url root
+echo "$3" > "$PKI_DIR/scepmanurlroot"
+
 # get UPN from cert path
 BN=$(basename $PFX_FILE)
 UPN=$(echo "${BN//certificate-/""}" | cut -d '-' -f 1)
