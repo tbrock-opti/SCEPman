@@ -7,8 +7,8 @@
 PFX_FILE="$1"
 PFX_PASS="$2"
 PKI_DIR="/home/$USER/.scepman"
-ENC_KEY_FILE="scepman-client.key.pem"
-NOENC_KEY_FILE="scepman-client-noenc.key.pem"
+KEY_FILE="scepman-client.key.pem"
+#NOENC_KEY_FILE="scepman-client-noenc.key.pem"
 CERT_FILE="scepman-client.pem"
 CA_CERT_PATH="$3"
 CA_CERT_FILENAME="scepman-root.pem"
@@ -40,11 +40,11 @@ echo $PFX_PASS > $PKI_DIR/pp
 
 # extract key from PFX and encrypt with PFX password
 echo "Extracting private key..."
-openssl pkcs12 -in $PFX_FILE -nocerts -out $PKI_DIR/$ENC_KEY_FILE -passin pass:$PFX_PASS -passout pass:$PFX_PASS
+openssl pkcs12 -in $PFX_FILE -nocerts -out $PKI_DIR/$KEY_FILE -passin pass:$PFX_PASS -passout pass:$PFX_PASS
 
 # extract key from PFX and do not encrypt
 # renewing cert isn't compatible with encrypted key files
-openssl pkcs12 -in $PFX_FILE -nocerts -out $PKI_DIR/$NOENC_KEY_FILE -passin pass:$PFX_PASS -passout pass:""
+#openssl pkcs12 -in $PFX_FILE -nocerts -out $PKI_DIR/$NOENC_KEY_FILE -passin pass:$PFX_PASS -passout pass:""
 
 # extract certificate from PFX
 echo "Extracting client certificate..."
@@ -59,5 +59,5 @@ nmcli c add type wifi ifname wlan0 con-name "Optimizely Internal" \
 	802-1x.identity anonymous \
 	802-1x.ca-cert $PKI_DIR/$CA_CERT_FILENAME \
 	802-1x.client-cert $PKI_DIR/$CERT_FILE \
-	802-1x.private-key $PKI_DIR/$ENC_KEY_FILE \
+	802-1x.private-key $PKI_DIR/$KEY_FILE \
 	802-1x.private-key-password $PFX_PASS
