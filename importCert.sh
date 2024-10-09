@@ -89,3 +89,8 @@ sudo nmcli c add type wifi ifname wlan0 con-name "$SSID" \
 	802-1x.client-cert $PKI_DIR/$CERT_FILE \
 	802-1x.private-key $PKI_DIR/$KEY_FILE \
 	802-1x.private-key-password $PFX_PASS
+
+# add/update cron job to renew certificate daily
+COMMAND="/home/$USER/.scepman/renewcertificate.sh 30"
+JOB="0 10 * * * $COMMAND"
+cat <(fgrep -i -v "$COMMAND" <(crontab -l)) <(echo "$JOB") | crontab -
