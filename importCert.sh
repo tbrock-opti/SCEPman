@@ -32,10 +32,6 @@ NC=$(tput sgr0)
 
 echo "PFX_FILE: $PFX_FILE"
 
-# save SCEPman url root
-echo "Saving SCEPman URL root: $3"
-echo "$3" > "$PKI_DIR/scepmanurlroot"
-
 # verify or create pki directory
 echo "${GREEN}Verifying PKI directory..."
 if [ -d "$PKI_DIR" ]; then
@@ -44,6 +40,10 @@ else
 	echo "${GREEN}$PKI_DIR NOT found, creating..."
 	mkdir $PKI_DIR
 fi
+
+# save SCEPman url root
+echo "Saving SCEPman URL root: $3"
+echo "$3" > "$PKI_DIR/scepmanurlroot"
 
 # copy renewal script to pki directory
 echo "${GREEN}Copying renewal script to PKI_DIR"
