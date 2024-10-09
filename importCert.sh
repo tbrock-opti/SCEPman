@@ -59,9 +59,10 @@ openssl pkcs12 -in $1 -clcerts -nokeys -out $PKI_DIR/$CERT_FILE -passin pass:$PF
 
 # delete any existing connections for the same SSID
 echo "${GREEN}Deleting any existing $SSID connections...${NC}"
+CONS_DEL=$(nmcli -t -f name,UUID con | grep "$SSID" | cut -d ":" -f 2)
 while read -r line; do 
 	sudo nmcli con delete $line
-done <<< $(nmcli -t -f name,UUID con | grep "$SSID" | cut -d ":" -f 2)
+done <<< $CONS_DEL
 
 # create wifi connection
 echo "${GREEN}Creating Wifi Connection for $SSID...${NC}"
