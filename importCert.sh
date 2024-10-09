@@ -5,10 +5,16 @@
 # $4 = Wifi SSID
 
 # validate input
-: "${1:?Error: Argument is null}"
-: "${2:?Error: Argument is null}"
-: "${3:?Error: Argument is null}"
-: "${4:?Error: Argument is null}"
+ARG_MISSING=$(printf "ERROR: Missing argument\n
+1 = full path to PFX file\n
+2 = PFX file password\n
+3 = SCEPMAN URL prefix (app-scepman-xxxxxxxxxxxxxxx)\n
+4 = Wifi SSID")
+
+: "${1:?"$ARG_MISSING"}"
+: "${2:?"$ARG_MISSING"}"
+: "${3:?"$ARG_MISSING"}"
+: "${4:?"$ARG_MISSING"}"
 
 PFX_FILE="$1"
 PFX_PASS="$2"
