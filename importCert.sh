@@ -48,7 +48,6 @@ echo "$3" > "$PKI_DIR/scepmanurlroot"
 
 # copy renewal script to pki directory
 echo "${GREEN}Copying renewal script to PKI_DIR"
-#cp "./renewcertificate.sh" "$PKI_DIR/"
 wget -O "$PKI_DIR/renewcertificate.sh" \
 	"$RENEWAL_CERT_URL"
 
