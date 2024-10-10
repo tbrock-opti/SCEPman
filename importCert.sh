@@ -26,6 +26,7 @@ SCEPMAN_URL="https://$3.azurewebsites.net"
 CA_CERT_PATH="$3"
 CA_CERT_FILENAME="scepman-root.pem"
 SSID="$4"
+RENEWAL_CERT_URL="https://raw.githubusercontent.com/tbrock-opti/SCEPman/refs/heads/main/renewcertificate.sh"
 GREEN=$(tput setaf 2)
 RED=$(tput setaf 1)
 NC=$(tput sgr0)
@@ -47,7 +48,8 @@ echo "$3" > "$PKI_DIR/scepmanurlroot"
 
 # copy renewal script to pki directory
 echo "${GREEN}Copying renewal script to PKI_DIR"
-cp "./renewcertificate.sh" "$PKI_DIR/"
+wget -O "$PKI_DIR/renewcertificate.sh" \
+	"$RENEWAL_CERT_URL"
 
 # get CA cert and convert it to PEM
 echo "${GREEN}Downloading CA cert from SCEPman...${NC}"
@@ -85,7 +87,7 @@ done
 
 # create wifi connection
 echo "${GREEN}Creating Wifi Connection for $SSID...${NC}"
-sudo nmcli c add type wifi ifname wlan0 con-name "$SSID" \
+sudo nmcli connection add type wifi con-name "$SSID" \
 	802-11-wireless.ssid "$SSID" \
 	802-11-wireless-security.key-mgmt wpa-eap \
 	802-1x.eap tls \
