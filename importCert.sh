@@ -88,7 +88,7 @@ done
 
 # create wifi connection
 echo "${GREEN}Creating Wifi Connection for $SSID...${NC}"
-sudo nmcli c add type wifi ifname wlan0 con-name "$SSID" \
+sudo nmcli connection add type wifi con-name "$SSID" \
 	802-11-wireless.ssid "$SSID" \
 	802-11-wireless-security.key-mgmt wpa-eap \
 	802-1x.eap tls \
