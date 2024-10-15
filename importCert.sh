@@ -5,27 +5,32 @@
 # $4 = Wifi SSID
 
 # validate input
-ARG_MISSING=$(printf "ERROR: Missing argument\n
-1 = full path to PFX file\n
-2 = PFX file password\n
-3 = SCEPMAN URL prefix (app-scepman-xxxxxxxxxxxxxxx)\n
-4 = Wifi SSID")
+#ARG_MISSING=$(printf "ERROR: Missing argument\n
+#1 = full path to PFX file\n
+#2 = PFX file password\n
+#3 = SCEPMAN URL prefix (app-scepman-xxxxxxxxxxxxxxx)\n
+#4 = Wifi SSID")
 
-: "${1:?"$ARG_MISSING"}"
-: "${2:?"$ARG_MISSING"}"
-: "${3:?"$ARG_MISSING"}"
-: "${4:?"$ARG_MISSING"}"
+#: "${1:?"$ARG_MISSING"}"
+#: "${2:?"$ARG_MISSING"}"
+#: "${3:?"$ARG_MISSING"}"
+#: "${4:?"$ARG_MISSING"}"
 
-PFX_FILE="$1"
-PFX_PASS="$2"
+read -p 'Full path to PFX file: ' PFX_FILE
+read -p 'PFX file password: ' PFX_PASS
+read -p 'SCEPman URL Prefix: ' SCEPMAN_PREFIX
+read -p 'Wifi Network name: ' SSID
+
+#PFX_FILE="$1"
+#PFX_PASS="$2"
 PKI_DIR="/home/$USER/.scepman"
 KEY_FILE="scepman-client.key.pem"
 #NOENC_KEY_FILE="scepman-client-noenc.key.pem"
 CERT_FILE="scepman-client.pem"
-SCEPMAN_URL="https://$3.azurewebsites.net"
+SCEPMAN_URL="https://$SCEPMAN_PREFIX.azurewebsites.net"
 CA_CERT_PATH="$3"
 CA_CERT_FILENAME="scepman-root.pem"
-SSID="$4"
+#SSID="$4"
 RENEWAL_CERT_URL="https://raw.githubusercontent.com/tbrock-opti/SCEPman/refs/heads/main/renewcertificate.sh"
 GREEN=$(tput setaf 2)
 RED=$(tput setaf 1)
@@ -64,6 +69,9 @@ BN=$(basename $PFX_FILE)
 UPN=$(echo "${BN//certificate-/}")
 #echo "UPN temp: $UPN"
 UPN=$(echo $UPN | cut -d '-' -f 1)
+UPN=$(echo "$UPN" | tr '_' '@')
+
+
 echo "${GREEN}Saving UPN: $UPN...${NC}"
 echo $UPN >$PKI_DIR/upn
 
