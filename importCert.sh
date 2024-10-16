@@ -62,7 +62,7 @@ wget -O "$PKI_DIR/scepman-root.cer" \
 	"$SCEPMAN_URL/certsrv/mscep/mscep.dll/pkiclient.exe?operation=GetCACert"
 
 echo "${GREEN}Converting CA cert to PEM...${NC}"
-openssl x509 -in "$PKI_DIR/scepman-root.cer" \
+openssl x509 -inform DER -in "$PKI_DIR/scepman-root.cer" \
 	-outform PEM -out "$PKI_DIR/scepman-root.pem"
 
 # save username (to be used in renewal script)
