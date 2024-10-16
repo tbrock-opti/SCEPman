@@ -28,7 +28,7 @@ KEY_FILE="scepman-client.key.pem"
 #NOENC_KEY_FILE="scepman-client-noenc.key.pem"
 CERT_FILE="scepman-client.pem"
 SCEPMAN_URL="https://$SCEPMAN_PREFIX.azurewebsites.net"
-CA_CERT_PATH="$3"
+#CA_CERT_PATH="$3"
 CA_CERT_FILENAME="scepman-root.pem"
 #SSID="$4"
 RENEWAL_CERT_URL="https://raw.githubusercontent.com/tbrock-opti/SCEPman/refs/heads/main/renewcertificate.sh"
@@ -48,8 +48,8 @@ else
 fi
 
 # save SCEPman url root
-echo "Saving SCEPman URL root: $3"
-echo "$3" > "$PKI_DIR/scepmanurlroot"
+echo "Saving SCEPman URL root: $SCEPMAN_PREFIX"
+echo "$SCEPMAN_PREFIX" > "$PKI_DIR/scepmanurlroot"
 
 # copy renewal script to pki directory
 echo "${GREEN}Copying renewal script to PKI_DIR"
@@ -60,6 +60,8 @@ wget -O "$PKI_DIR/renewcertificate.sh" \
 echo "${GREEN}Downloading CA cert from SCEPman...${NC}"
 wget -O "$PKI_DIR/scepman-root.cer" \
 	"$SCEPMAN_URL/certsrv/mscep/mscep.dll/pkiclient.exe?operation=GetCACert"
+
+echo "${GREEN}Converting CA cert to PEM...${NC}"
 openssl x509 -in "$PKI_DIR/scepman-root.cer" \
 	-outform PEM -out "$PKI_DIR/scepman-root.pem"
 
@@ -80,11 +82,11 @@ echo $PFX_PASS >$PKI_DIR/pp
 
 # extract key from PFX and encrypt with PFX password
 echo "${GREEN}Extracting private key...${NC}"
-openssl pkcs12 -in $PFX_FILE -nocerts -out $PKI_DIR/$KEY_FILE -passin pass:$PFX_PASS -passout pass:$PFX_PASS
+openssl pkcs12 -in "$PFX_FILE" -nocerts -out "$PKI_DIR/$KEY_FILE" -passin pass:$PFX_PASS -passout pass:$PFX_PASS
 
 # extract certificate from PFX
 echo "${GREEN}Extracting client certificate...${NC}"
-openssl pkcs12 -in $1 -clcerts -nokeys -out $PKI_DIR/$CERT_FILE -passin pass:$PFX_PASS
+openssl pkcs12 -in "$PFX_FILE" -clcerts -nokeys -out "$PKI_DIR/$CERT_FILE" -passin pass:$PFX_PASS
 
 # delete any existing connections for the same SSID
 echo "${GREEN}Deleting any existing $SSID connections...${NC}"
@@ -100,9 +102,9 @@ sudo nmcli connection add type wifi con-name "$SSID" \
 	802-11-wireless-security.key-mgmt wpa-eap \
 	802-1x.eap tls \
 	802-1x.identity anonymous \
-	802-1x.ca-cert $PKI_DIR/$CA_CERT_FILENAME \
-	802-1x.client-cert $PKI_DIR/$CERT_FILE \
-	802-1x.private-key $PKI_DIR/$KEY_FILE \
+	802-1x.ca-cert "$PKI_DIR/$CA_CERT_FILENAME" \
+	802-1x.client-cert "$PKI_DIR/$CERT_FILE" \
+	802-1x.private-key "$PKI_DIR/$KEY_FILE" \
 	802-1x.private-key-password $PFX_PASS
 
 # add/update cron job to renew certificate daily
