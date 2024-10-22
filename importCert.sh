@@ -1,119 +1,130 @@
-# parameters
-# $1 = full path to downloaded PFX file
-# $2 = PFX file password
-# $3 = SCEPman URL prefix (app-scepman-xxxxxxxxxxxxxxx)
-# $4 = Wifi SSID
+#!/bin/bash
 
-# validate input
-#ARG_MISSING=$(printf "ERROR: Missing argument\n
-#1 = full path to PFX file\n
-#2 = PFX file password\n
-#3 = SCEPMAN URL prefix (app-scepman-xxxxxxxxxxxxxxx)\n
-#4 = Wifi SSID")
-
-#: "${1:?"$ARG_MISSING"}"
-#: "${2:?"$ARG_MISSING"}"
-#: "${3:?"$ARG_MISSING"}"
-#: "${4:?"$ARG_MISSING"}"
-
-read -p 'Full path to PFX file: ' PFX_FILE
-read -p 'PFX file password: ' PFX_PASS
-read -p 'SCEPman URL Prefix: ' SCEPMAN_PREFIX
-read -p 'Wifi Network name: ' SSID
-
-#PFX_FILE="$1"
-#PFX_PASS="$2"
-PKI_DIR="/home/$USER/.scepman"
-KEY_FILE="scepman-client.key.pem"
-#NOENC_KEY_FILE="scepman-client-noenc.key.pem"
-CERT_FILE="scepman-client.pem"
-SCEPMAN_URL="https://$SCEPMAN_PREFIX.azurewebsites.net"
-#CA_CERT_PATH="$3"
-CA_CERT_FILENAME="scepman-root.pem"
-#SSID="$4"
-RENEWAL_CERT_URL="https://raw.githubusercontent.com/tbrock-opti/SCEPman/refs/heads/main/renewcertificate.sh"
-GREEN=$(tput setaf 2)
-RED=$(tput setaf 1)
-NC=$(tput sgr0)
-
-echo "PFX_FILE: $PFX_FILE"
-
-# verify or create pki directory
-echo "${GREEN}Verifying PKI directory..."
-if [ -d "$PKI_DIR" ]; then
-	echo "$PKI_DIR exists..."
-else
-	echo "${GREEN}$PKI_DIR NOT found, creating..."
-	mkdir $PKI_DIR
+# Ensure Zenity is installed
+if ! command -v zenity &> /dev/null; then
+    echo "Zenity is not installed. Please install it to use this script."
+    exit 1
 fi
 
-# save SCEPman url root
+# Function to clean up in case of errors
+cleanup() {
+    zenity --warning --text="An error occurred. Undoing changes."
+    rm -rf "$PKI_DIR"
+    # Add additional rollback commands if needed, e.g., removing network connections
+}
+
+# Set trap to call cleanup on any error
+trap cleanup ERR
+
+# Prompt user for inputs using Zenity dialogs
+PFX_FILE=$(zenity --file-selection --title="Select the PFX File")
+if [[ -z "$PFX_FILE" ]]; then
+    zenity --error --text="No file selected. Exiting."
+    exit 1
+fi
+
+PFX_PASS=$(zenity --entry --title="PFX Password" --hide-text --text="Enter the PFX file password")
+if [[ -z "$PFX_PASS" ]]; then
+    zenity --error --text="Password not provided. Exiting."
+    exit 1
+fi
+
+SCEPMAN_PREFIX=$(zenity --entry --title="SCEPman URL" --text="Enter the SCEPman URL prefix" --entry-text="app-scepman-kuvpncndxfzvo")
+if [[ -z "$SCEPMAN_PREFIX" ]]; then
+    zenity --error --text="SCEPman URL not provided. Exiting."
+    exit 1
+fi
+
+SSID=$(zenity --entry --title="Wi-Fi SSID" --text="Enter the Wi-Fi SSID" --entry-text="Optimizely Internal")
+if [[ -z "$SSID" ]]; then
+    zenity --error --text="SSID not provided. Exiting."
+    exit 1
+fi
+
+UPN=$(zenity --entry --title="UPN/Username" --text="Enter the UPN/Username, i.e: QuocHuy.Le@optimizely.com")
+if [[ -z "$UPN" ]]; then
+    zenity --error --text="UPN/Username not provided. Exiting."
+    exit 1
+fi
+
+USERHOME=${USER%@*}
+
+# Define necessary variables
+PKI_DIR="/home/$USERHOME/.scepman"
+KEY_FILE="scepman-client.key.pem"
+CERT_FILE="scepman-client.pem"
+SCEPMAN_URL="https://$SCEPMAN_PREFIX.azurewebsites.net"
+CA_CERT_FILENAME="scepman-root.pem"
+RENEWAL_CERT_URL="https://github.com/quochuyle/SCEPmanTest/raw/refs/heads/main/renewcertificate.sh"
+GREEN=$(tput setaf 2)
+NC=$(tput sgr0)
+
+# Verify or create PKI directory
+echo "${GREEN}Verifying PKI directory..."
+if [ -d "$PKI_DIR" ]; then
+    echo "$PKI_DIR exists..."
+else
+    echo "${GREEN}$PKI_DIR NOT found, creating..."
+    mkdir $PKI_DIR || exit 1
+fi
+
+# Save SCEPman URL root
 echo "Saving SCEPman URL root: $SCEPMAN_PREFIX"
 echo "$SCEPMAN_PREFIX" > "$PKI_DIR/scepmanurlroot"
 
-# copy renewal script to pki directory
+# Copy renewal script to PKI directory
 echo "${GREEN}Copying renewal script to PKI_DIR"
-wget -O "$PKI_DIR/renewcertificate.sh" \
-	"$RENEWAL_CERT_URL"
+wget -O "$PKI_DIR/renewcertificate.sh" "$RENEWAL_CERT_URL" || exit 1
 
-# get CA cert and convert it to PEM
+# Get CA cert and convert it to PEM
 echo "${GREEN}Downloading CA cert from SCEPman...${NC}"
-wget -O "$PKI_DIR/scepman-root.cer" \
-	"$SCEPMAN_URL/certsrv/mscep/mscep.dll/pkiclient.exe?operation=GetCACert"
+wget -O "$PKI_DIR/scepman-root.cer" "$SCEPMAN_URL/certsrv/mscep/mscep.dll/pkiclient.exe?operation=GetCACert" || exit 1
 
 echo "${GREEN}Converting CA cert to PEM...${NC}"
-openssl x509 -inform DER -in "$PKI_DIR/scepman-root.cer" \
-	-outform PEM -out "$PKI_DIR/scepman-root.pem"
+openssl x509 -inform DER -in "$PKI_DIR/scepman-root.cer" -outform PEM -out "$PKI_DIR/$CA_CERT_FILENAME" || exit 1
 
-# save username (to be used in renewal script)
-BN=$(basename $PFX_FILE)
-#echo "basename; $BN"
-UPN=$(echo "${BN//certificate-/}")
-#echo "UPN temp: $UPN"
-UPN=$(echo $UPN | cut -d '-' -f 1)
-UPN=$(echo "$UPN" | tr '_' '@')
-
-
+# Save UPN
 echo "${GREEN}Saving UPN: $UPN...${NC}"
 echo $UPN >$PKI_DIR/upn
 
-# save private key passphrase
+# Save private key passphrase
 echo $PFX_PASS >$PKI_DIR/pp
 
-# extract key from PFX and encrypt with PFX password
+# Extract key from PFX and encrypt with PFX password
 echo "${GREEN}Extracting private key...${NC}"
-openssl pkcs12 -in "$PFX_FILE" -nocerts -out "$PKI_DIR/$KEY_FILE" -passin pass:$PFX_PASS -passout pass:$PFX_PASS
+openssl pkcs12 -in "$PFX_FILE" -nocerts -out "$PKI_DIR/$KEY_FILE" -passin pass:$PFX_PASS -passout pass:$PFX_PASS || exit 1
 
-# extract certificate from PFX
+# Extract certificate from PFX
 echo "${GREEN}Extracting client certificate...${NC}"
-openssl pkcs12 -in "$PFX_FILE" -clcerts -nokeys -out "$PKI_DIR/$CERT_FILE" -passin pass:$PFX_PASS
+openssl pkcs12 -in "$PFX_FILE" -clcerts -nokeys -out "$PKI_DIR/$CERT_FILE" -passin pass:$PFX_PASS || exit 1
 
-# delete any existing connections for the same SSID
+# Delete any existing connections for the same SSID
 echo "${GREEN}Deleting any existing $SSID connections...${NC}"
 CONS_DEL=$(nmcli -t -f name,UUID con | grep "$SSID" | cut -d ":" -f 2)
 for line in $CONS_DEL; do
-	sudo nmcli con delete "$line"
+    sudo nmcli con delete "$line"
 done
 
-# create wifi connection
+# Create Wi-Fi connection
 echo "${GREEN}Creating Wifi Connection for $SSID...${NC}"
 sudo nmcli connection add type wifi con-name "$SSID" \
-	802-11-wireless.ssid "$SSID" \
-	802-11-wireless-security.key-mgmt wpa-eap \
-	802-1x.eap tls \
-	802-1x.identity anonymous \
-	802-1x.ca-cert "$PKI_DIR/$CA_CERT_FILENAME" \
-	802-1x.client-cert "$PKI_DIR/$CERT_FILE" \
-	802-1x.private-key "$PKI_DIR/$KEY_FILE" \
-	802-1x.private-key-password $PFX_PASS
+    802-11-wireless.ssid "$SSID" \
+    802-11-wireless-security.key-mgmt wpa-eap \
+    802-1x.eap tls \
+    802-1x.identity "$UPN" \
+    802-1x.ca-cert "$PKI_DIR/$CA_CERT_FILENAME" \
+    802-1x.client-cert "$PKI_DIR/$CERT_FILE" \
+    802-1x.private-key "$PKI_DIR/$KEY_FILE" \
+    802-1x.private-key-password "$PFX_PASS" || exit 1
 
-# add/update cron job to renew certificate daily
+# Add/update cron job to renew certificate daily
 echo "${GREEN}Adding cron job for renewal...${NC}"
-COMMAND="/home/$USER/.scepman/renewcertificate.sh 30"
+COMMAND="$PKI_DIR/renewcertificate.sh 30"
 JOB="0 10 * * * $COMMAND"
 (
-	crontab -l
-	echo "$JOB"
+    crontab -l
+    echo "$JOB"
 ) | sort - | uniq - | crontab -
 echo "${GREEN}cron jobs:${NC}"
 crontab -l
+sudo chmod +x "$PKI_DIR/renewcertificate.sh"

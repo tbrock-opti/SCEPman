@@ -5,8 +5,10 @@
 # Example command:
 # sh renewcertificate.sh 10
 
+USERHOME=${USER%@*}
+
 # prepare variables
-PKI_DIR="/home/$USER/.scepman"                # user scepman directory
+PKI_DIR="/home/$USERHOME/.scepman"                # user scepman directory
 NOENC_KEY_FILE="scepman-client-noenc.key.pem" # unencrypted key file name
 KEY_FILE="scepman-client.key.pem"
 CERT_FILE="scepman-client.pem"                  # client cert file name
@@ -32,6 +34,8 @@ TEMP_PEM="$TEMP/tmp.pem"
 SECONDS_IN_DAY="86400"
 RENEWAL_THRESHOLD_DAYS="$1" # Can be changed - number of days before expiry that a certificate will be renewed
 RENEWAL_THRESHOLD=$(($RENEWAL_THRESHOLD_DAYS * $SECONDS_IN_DAY))
+
+echo "$RENEWAL_THRESHOLD"
 
 trap "rm -r $TEMP" EXIT
 
