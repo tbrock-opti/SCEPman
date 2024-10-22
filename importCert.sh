@@ -10,7 +10,6 @@ fi
 cleanup() {
     zenity --warning --text="An error occurred. Undoing changes."
     rm -rf "$PKI_DIR"
-    # Add additional rollback commands if needed, e.g., removing network connections
 }
 
 # Set trap to call cleanup on any error
@@ -29,17 +28,7 @@ if [[ -z "$PFX_PASS" ]]; then
     exit 1
 fi
 
-SCEPMAN_PREFIX=$(zenity --entry --title="SCEPman URL" --text="Enter the SCEPman URL prefix" --entry-text="app-scepman-kuvpncndxfzvo")
-if [[ -z "$SCEPMAN_PREFIX" ]]; then
-    zenity --error --text="SCEPman URL not provided. Exiting."
-    exit 1
-fi
-
-SSID=$(zenity --entry --title="Wi-Fi SSID" --text="Enter the Wi-Fi SSID" --entry-text="Optimizely Internal")
-if [[ -z "$SSID" ]]; then
-    zenity --error --text="SSID not provided. Exiting."
-    exit 1
-fi
+SSID="Optimizely Internal"
 
 UPN=$(zenity --entry --title="UPN/Username" --text="Enter the UPN/Username, i.e: QuocHuy.Le@optimizely.com")
 if [[ -z "$UPN" ]]; then
@@ -53,9 +42,9 @@ USERHOME=${USER%@*}
 PKI_DIR="/home/$USERHOME/.scepman"
 KEY_FILE="scepman-client.key.pem"
 CERT_FILE="scepman-client.pem"
-SCEPMAN_URL="https://$SCEPMAN_PREFIX.azurewebsites.net"
+SCEPMAN_URL="https://app-scepman-kuvpncndxfzvo.azurewebsites.net"
 CA_CERT_FILENAME="scepman-root.pem"
-RENEWAL_CERT_URL="https://github.com/quochuyle/SCEPmanTest/raw/refs/heads/main/renewcertificate.sh"
+RENEWAL_CERT_URL="http://10.141.0.33/scepman/renewcertificate.sh"
 GREEN=$(tput setaf 2)
 NC=$(tput sgr0)
 
