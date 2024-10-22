@@ -35,8 +35,6 @@ SECONDS_IN_DAY="86400"
 RENEWAL_THRESHOLD_DAYS="$1" # Can be changed - number of days before expiry that a certificate will be renewed
 RENEWAL_THRESHOLD=$(($RENEWAL_THRESHOLD_DAYS * $SECONDS_IN_DAY))
 
-echo "$RENEWAL_THRESHOLD"
-
 trap "rm -r $TEMP" EXIT
 
 # if revoked then do nothing
