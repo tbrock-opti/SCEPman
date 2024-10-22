@@ -30,11 +30,11 @@ fi
 
 SSID="Optimizely Internal"
 
-UPN=$(zenity --entry --title="UPN/Username" --text="Enter the UPN/Username, i.e: QuocHuy.Le@optimizely.com")
-if [[ -z "$UPN" ]]; then
-    zenity --error --text="UPN/Username not provided. Exiting."
-    exit 1
-fi
+#UPN=$(zenity --entry --title="UPN/Username" --text="Enter the UPN/Username, i.e: QuocHuy.Le@optimizely.com")
+#if [[ -z "$UPN" ]]; then
+#    zenity --error --text="UPN/Username not provided. Exiting."
+#    exit 1
+#fi
 
 USERHOME=${USER%@*}
 
@@ -73,8 +73,8 @@ echo "${GREEN}Converting CA cert to PEM...${NC}"
 openssl x509 -inform DER -in "$PKI_DIR/scepman-root.cer" -outform PEM -out "$PKI_DIR/$CA_CERT_FILENAME" || exit 1
 
 # Save UPN
-echo "${GREEN}Saving UPN: $UPN...${NC}"
-echo $UPN >$PKI_DIR/upn
+#echo "${GREEN}Saving UPN: $UPN...${NC}"
+#echo $UPN >$PKI_DIR/upn
 
 # Save private key passphrase
 echo $PFX_PASS >$PKI_DIR/pp
@@ -100,7 +100,7 @@ sudo nmcli connection add type wifi con-name "$SSID" \
     802-11-wireless.ssid "$SSID" \
     802-11-wireless-security.key-mgmt wpa-eap \
     802-1x.eap tls \
-    802-1x.identity "$UPN" \
+    802-1x.identity "anonymous" \
     802-1x.ca-cert "$PKI_DIR/$CA_CERT_FILENAME" \
     802-1x.client-cert "$PKI_DIR/$CERT_FILE" \
     802-1x.private-key "$PKI_DIR/$KEY_FILE" \
