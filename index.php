@@ -111,7 +111,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <h2>
                 Your certificate should be downloading automatically right now!
                 <br>
-                Be sure to check for blocked pop-ups.
+                Be sure to check for blocked pop-ups and click keep or save if prompted.
                 <br><br>
                 If you are unable to download it for any reason, right click the link above and click save as. Then,
                 follow the directions below to complete the process.
