@@ -56,7 +56,7 @@
         }
 
         legend {
-            font-size: larger;
+            font-size: x-large;
             font-weight: bold;
         }
     </style>
